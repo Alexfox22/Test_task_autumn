@@ -8,42 +8,45 @@
 
 using namespace std;
 
+int get_batch(string& line)		//returns batch code from data
+{
+	return stoi(line.substr(0, line.find(';')));
+}
+
+string get_name(string& line)		//returns name from data
+{
+	int dist = line.find(';', line.find(';') + 1) - line.find(';') - 1;
+	return line.substr(line.find(';') + 1, dist);
+}
 
 int main()
 {
 	setlocale(LC_ALL, "Russian");
 	vector<string> product_info;
-	unordered_map<int, string*> batch_code;
-	unordered_map<string, string*> name;
+	unordered_map<int, string*> batch_indexed_map;		//map for batch code search;
+	unordered_map<string, string*> name_indexed_map;		//map for name search;
 
 	string current_string;
 	ifstream file;
-	file.open("\\data\products.csv");
+	file.open("\\data\\products.csv");
+	if (!file.is_open())
+		cerr << "\n\n\t\tFile not open!";
+	else {
+		
+		while (getline(file, current_string))		//read data from file to vector
+		{
+			product_info.push_back(current_string);
+		}
 
-	while (getline(file, current_string))
-	{
-		product_info.push_back(current_string);
+		for (auto& product : product_info)		//fill maps for search
+		{
+			batch_indexed_map[get_batch(product)] = &product;
+			name_indexed_map[get_name(product)] = &product;
+		}
 	}
-	for (int i = 0; i < product_info.size(); i++)
-	{
-		batch_code[stoi(product_info[i].substr(0, product_info[i].find(';')))] = &product_info[i];
-		int dist = distance(product_info[i].cbegin(), find(next(find(product_info[i].cbegin(), product_info[i].cend(), ';')), product_info[i].cend(), ';')) - product_info[i].find(";") - 1;
-		name[product_info[i].substr(product_info[i].find(';') + 1, dist)] = &product_info[i];
-	}
-
-	string type;
-	cout << "1. Batch" << endl << "2. Name" << endl;
-	cin >> type;
-	switch (stoi(type))
-	{
-	case 1: {
-		cin >> type;
-		cout << *(batch_code[stoi(type)]); }
-	case 2: {
-		cin >> type;
-		cout << type;
-		cout << *(name[type]); }
-	}
+	//string type = "134123123";
+	//cout << *(batch_indexed_map[stoi(type)]);		//find by batch code
+	//cout << *(name_indexed_map[type]);		//find by name
 
 	return 0;
 }
